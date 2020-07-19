@@ -1,5 +1,5 @@
 # kind-k8s-cluster
-Setup for a k8s cluster using kind (k8s in docker)
+Details for installation of a k8s cluster using kind (k8s in docker)
 
 ## Set up a cluster with three workers
 
