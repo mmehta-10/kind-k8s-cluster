@@ -1,7 +1,10 @@
 #!/bin/sh
 
+# Generate certs locally in ./ssl dir
+
 mkdir ssl
-cat << EOF > ssl/req.cnf
+
+cat <<EOF >ssl/req.cnf
 [req]
 req_extensions = v3_req
 distinguished_name = req_distinguished_name
