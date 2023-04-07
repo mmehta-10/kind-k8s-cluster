@@ -1,4 +1,4 @@
-
+# SOURCE: https://github.com/dexidp/dex/blob/8b6ff2d401e42ec3c75796c2649be422eef4f5b2/examples/ldap/config-ldap.yaml
 # The base path of Dex and the external name of the OpenID Connect service.
 # This is the canonical URL that all clients MUST use to get authenticated with Dex. If a
 # path is provided, Dex's HTTP service listens at a non-root URL.
@@ -18,7 +18,7 @@ web:
   https: 0.0.0.0:5557
   tlsCert: /ssl/cert.pem
   tlsKey: /ssl/key.pem
-#-----------
+
 connectors:
 - type: ldap
   name: OpenLDAP
@@ -27,7 +27,7 @@ connectors:
     # The following configurations seem to work with OpenLDAP:
     #
     # 1) Plain LDAP, without TLS:
-    host: localhost:389
+    host: ldap_ldap_1:389
     insecureNoSSL: true
     #
     # 2) LDAPS without certificate validation:
@@ -72,29 +72,20 @@ connectors:
       # The group name should be the "cn" value.
       nameAttr: cn
 
-# staticClients:
-# - id: example-app
-#   redirectURIs:
-#   - 'http://127.0.0.1:5555/callback'
-#   name: 'Example App'
-#   secret: ZXhhbXBsZS1hcHAtc2VjcmV0
-
-#-----------
-# staticClients:
+staticClients:
+# Use with kubelogin 
 # - id: kubernetes
 #   redirectURIs:
-#   - 'http://127.0.0.1:18000'
-#   - 'http://127.0.0.1:8000'
-#   name: kubernetes
-#   secret: ZXhhbXBsZS1hcHAtc2VjcmV0
-
-staticClients:
+#   - 'http://localhost:8000'
+#   - 'http://localhost:18000'
+#   name: 'Kubernetes'
+#   secret: SuperSecretSecret
+# Use with dex-k8s-authenticator
 - id: kubernetes
   redirectURIs:
-  - 'http://localhost:8000'
-  - 'http://localhost:18000'
+  - http://dex-k8s-authenticator.127.0.0.1.nip.io/callback
   name: 'Kubernetes'
-  secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+  secret: SuperSecretSecret  
 
 # A static list of passwords to log in the end user.
 # After configuring this section, Dex does not look in its underlying storage for passwords.
