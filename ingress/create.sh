@@ -6,8 +6,8 @@ echo $BASEDIR
 
 # HOME_DIR=$PWD # HOME_DIR=$(dirname `dirname $PWD`)
 
-CONTAINER_IP=`docker container inspect kind-control-plane \
-  --format '{{ .NetworkSettings.Networks.kind.IPAddress }}'`
+CONTAINER_IP=$(docker container inspect kind-control-plane \
+  --format '{{ .NetworkSettings.Networks.kind.IPAddress }}')
 
 HOST="yourdomain.com"
 
@@ -19,8 +19,7 @@ docker run \
   --rm \
   curlimages/curl:7.71.0 $HOST/foo -I
 
-
-# For linux 
+# For linux
 # FILE=/etc/hosts
 
 # if ! grep -i $HOST $FILE; then

@@ -1,3 +1,4 @@
+# Apply below config to test whether ingress works on Kind cluster or not 
 kind: Pod
 apiVersion: v1
 metadata:
