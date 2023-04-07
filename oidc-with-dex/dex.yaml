@@ -83,7 +83,7 @@ staticClients:
 # Use with dex-k8s-authenticator
 - id: kubernetes
   redirectURIs:
-  - http://dex-k8s-authenticator.127.0.0.7.nip.io/callback
+  - http://dex-k8s-authenticator.127.0.0.1.nip.io/callback
   name: 'Kubernetes'
   secret: SuperSecretSecret  
 

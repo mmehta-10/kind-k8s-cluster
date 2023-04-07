@@ -10,11 +10,11 @@ dn: ou=People,dc=example,dc=org
 objectClass: organizationalUnit
 ou: People
 
-dn: cn=jane,ou=People,dc=example,dc=org
+dn: cn=megha,ou=People,dc=example,dc=org
 objectClass: person
 objectClass: inetOrgPerson
-sn: doe
-cn: jane
+sn: mehta
+cn: megha
 mail: meghamehta@example.com
 userpassword: foo
 
@@ -36,9 +36,9 @@ dn: cn=admins,ou=Groups,dc=example,dc=org
 objectClass: groupOfNames
 cn: admins
 member: cn=john,ou=People,dc=example,dc=org
-member: cn=jane,ou=People,dc=example,dc=org
+member: cn=megha,ou=People,dc=example,dc=org
 
 dn: cn=developers,ou=Groups,dc=example,dc=org
 objectClass: groupOfNames
 cn: developers
-member: cn=jane,ou=People,dc=example,dc=org
+member: cn=megha,ou=People,dc=example,dc=org
