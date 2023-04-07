@@ -1,0 +1,1 @@
+https://docs.solo.io/gloo-gateway/2.1.x/observability/dashboard/auth/dex/

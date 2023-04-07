@@ -1,0 +1,38 @@
+---
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  # add a mount CA cert from /path/to/my/files on the host to /files on the node
+  extraMounts:
+  - hostPath: ./ssl
+    containerPath: /ssl
+    # optional: if set, the mount is read-only.
+    # default false
+    readOnly: true
+    # optional: if set, the mount needs SELinux relabeling.
+    # default false
+    selinuxRelabel: false
+    # optional: set propagation mode (None, HostToContainer or Bidirectional)
+    # see https://kubernetes.io/docs/concepts/storage/volumes/#mount-propagation
+    # default None
+    propagation: None
+  kubeadmConfigPatches:
+  - |
+    
+    kind: ClusterConfiguration
+    apiServer:
+      extraArgs:
+        oidc-issuer-url: https://oidc:5557/dex
+        oidc-client-id: kubernetes
+        oidc-ca-file: /ssl/ca.pem
+        oidc-username-claim: email
+        oidc-groups-claim: groups
+      extraVolumes:
+      - name: "oidc-ssl"
+        hostPath: "/ssl"
+        mountPath: "/ssl"
+        readOnly: true
+        pathType: Directory
+- role: worker
+- role: worker
