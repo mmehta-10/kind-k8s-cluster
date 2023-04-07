@@ -14,7 +14,6 @@ start)
   # Create a kind cluster
   kind create cluster --config $KIND_CONFIG_FILE || true
   kubectl cluster-info --context kind-kind
-
   ;;
 
 apply)
@@ -22,7 +21,7 @@ apply)
   ;;
 
 delete)
-  # Run Init for a single component directory
+  # Destroy kind cluster
   kind delete cluster
   ;;
 
