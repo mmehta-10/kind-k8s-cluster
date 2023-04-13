@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  # labels:
+  #   app.kubernetes.io/instance: ingress-nginx
+  #   app.kubernetes.io/name: ingress-nginx
+  name: web
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  # labels:
+  #   app.kubernetes.io/instance: ingress-nginx
+  #   app.kubernetes.io/name: ingress-nginx
+  name: api
+---
+# SOURCE: https://rbac-manager.docs.fairwinds.com/rbacdefinitions/
+apiVersion: rbacmanager.reactiveops.io/v1beta1
+kind: RBACDefinition
+metadata:
+  name: rbac-def
+rbacBindings:
+  - name: cluster-admins
+    subjects:
+      - kind: User
+        name: jane@example.com
+    clusterRoleBindings:
+      - clusterRole: cluster-admin
+  - name: web-developers
+    subjects:
+      - kind: User
+        name: dave@example.com
+      - kind: User
+        name: joe@example.com
+    roleBindings:
+      - clusterRole: edit-web
+        namespace: web
+      - clusterRole: view
+        namespace: api
+  - name: ci-bot
+    subjects:
+      - kind: ServiceAccount
+        name: ci-bot
+        namespace: rbac-manager
+    roleBindings:
+      - clusterRole: edit
+        namespaceSelector:
+          matchLabels:
+            ci: edit
+      - clusterRole: admin
+        namespaceSelector:
+          matchExpressions:
+            - key: app
+              operator: In
+              values:
+                - web
+                - queue
