@@ -23,7 +23,7 @@ rbacBindings:
   - name: cluster-admins
     subjects:
       - kind: User
-        name: jane@example.com
+        name: meghamehta@example.com
     clusterRoleBindings:
       - clusterRole: cluster-admin
   - name: web-developers
@@ -33,7 +33,7 @@ rbacBindings:
       - kind: User
         name: joe@example.com
     roleBindings:
-      - clusterRole: edit-web
+      - clusterRole: edit
         namespace: web
       - clusterRole: view
         namespace: api
