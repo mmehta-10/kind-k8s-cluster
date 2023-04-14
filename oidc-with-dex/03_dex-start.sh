@@ -1,7 +1,9 @@
 #!/bin/bash
 
 set -eux
-BASEDIR=$(dirname $0)
+
+SCRIPT=$(realpath "$0")
+BASEDIR=$(dirname $SCRIPT)
 echo $BASEDIR
 
 HOME_DIR=$PWD # HOME_DIR=$(dirname `dirname $PWD`)
@@ -12,8 +14,8 @@ OIDC_PROVIDER_PORT=5557
 # Mount volumes to access dex.yaml (for dex configuration) and ./ssl (for certs)
 docker run -p $OIDC_PROVIDER_PORT:$OIDC_PROVIDER_PORT \
   -d --network=kind \
-  -v ${PWD}:/data:Z \
-  -v ${PWD}/ssl:/ssl:ro \
+  -v $BASEDIR:/data:Z \
+  -v $BASEDIR/ssl:/ssl:ro \
   --name oidc \
   ghcr.io/dexidp/dex:v2.31.0 \
   dex serve /data/dex.yaml
@@ -27,5 +29,5 @@ echo $(docker inspect oidc \-f '{{range .NetworkSettings.Networks}}{{.IPAddress}
 sleep 4
 
 # Is container working
-curl --cacert ssl/ca.pem \
+curl --cacert $BASEDIR/ssl/ca.pem \
   https://oidc:$OIDC_PROVIDER_PORT/dex/.well-known/openid-configuration

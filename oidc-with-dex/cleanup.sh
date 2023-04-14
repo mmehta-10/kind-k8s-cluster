@@ -10,7 +10,10 @@ HOME_DIR=$PWD # HOME_DIR=$(dirname `dirname $PWD`)
 docker-compose -f ../ldap/docker-compose.yaml down
 
 # Stop dex
-./dex-stop.sh
+./$BASEDIR/dex-stop.sh || true
 
 # Stop kind cluster 
-./kind.sh delete
+./$BASEDIR/kind.sh delete
+
+# Delete ssl dir 
+rm -rf $BASEDIR/ssl
