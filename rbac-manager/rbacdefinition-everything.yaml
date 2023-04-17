@@ -1,17 +1,11 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  # labels:
-  #   app.kubernetes.io/instance: ingress-nginx
-  #   app.kubernetes.io/name: ingress-nginx
   name: web
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  # labels:
-  #   app.kubernetes.io/instance: ingress-nginx
-  #   app.kubernetes.io/name: ingress-nginx
   name: api
 ---
 # SOURCE: https://rbac-manager.docs.fairwinds.com/rbacdefinitions/
@@ -28,10 +22,12 @@ rbacBindings:
       - clusterRole: cluster-admin
   - name: web-developers
     subjects:
-      - kind: User
-        name: dave@example.com
-      - kind: User
-        name: joe@example.com
+      - kind: Group
+        name: developers
+      # - kind: User
+      #   name: dave@example.com
+      # - kind: User
+      #   name: johndoe@example.com
     roleBindings:
       - clusterRole: edit
         namespace: web
