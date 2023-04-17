@@ -41,4 +41,4 @@ member: cn=megha,ou=People,dc=example,dc=org
 dn: cn=developers,ou=Groups,dc=example,dc=org
 objectClass: groupOfNames
 cn: developers
-member: cn=megha,ou=People,dc=example,dc=org
+member: cn=john,ou=People,dc=example,dc=org
