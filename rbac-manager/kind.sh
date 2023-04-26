@@ -6,13 +6,12 @@ echo $BASEDIR
 
 HOME_DIR=$PWD # HOME_DIR=$(dirname `dirname $PWD`)
 
-# KIND_CONFIG_FILE=kind-config.yaml
-KIND_CONFIG_FILE=kind-config.yaml
+KIND_CONFIG_FILE=$BASEDIR/kind-config.yaml
 
 case $1 in
 start)
   # Create a kind cluster
-  kind create cluster --config $BASEDIR/$KIND_CONFIG_FILE || true
+  kind create cluster --config $KIND_CONFIG_FILE || true
   kubectl cluster-info --context kind-kind
   ;;
 
