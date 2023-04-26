@@ -81,7 +81,7 @@ connectors:
     #   nameAttr: cn
 
 staticClients:
-# Use with kubelogin 
+# Use with kubelogin
 # - id: kubernetes
 #   redirectURIs:
 #   - 'http://localhost:8000'
@@ -93,7 +93,7 @@ staticClients:
   redirectURIs:
   - http://dex-k8s-authenticator.127.0.0.1.nip.io/callback
   name: 'Kubernetes'
-  secret: SuperSecretSecret  
+  secret: SuperSecretSecret
 
 # A static list of passwords to log in the end user.
 # After configuring this section, Dex does not look in its underlying storage for passwords.

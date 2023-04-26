@@ -19,4 +19,3 @@ helm install rbac-manager fairwinds-stable/rbac-manager \
 # # Create nginx ingrass controller
 # kubectl apply -f \
 #   https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
-

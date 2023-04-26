@@ -1,16 +1,16 @@
 ## BYO AUTHN
 
-Follow this guide to set up authentication to K8s clusters using LDAP backend. Components used - 
+Follow this guide to set up authentication to K8s clusters using LDAP backend. Components used -
 
-- `dex` used as OIDC provider 
-- `OpenLDAP` for user management and source of truth for authentication 
-- Either of `kubelogin` or `dex-k8s-authenticator` for getting token from OIDC provider after succesful authentication. This token will be used to access k8s API server. 
+- `dex` used as OIDC provider
+- `OpenLDAP` for user management and source of truth for authentication
+- Either of `kubelogin` or `dex-k8s-authenticator` for getting token from OIDC provider after succesful authentication. This token will be used to access k8s API server.
 
-## Steps 
+## Steps
 
 - Generate certs in `./ssl`
 
-      ./01_gencerts.sh 
+      ./01_gencerts.sh
 
 - Start `kind` cluster, LDAP server and dex container - in that order:
 
@@ -19,21 +19,21 @@ Follow this guide to set up authentication to K8s clusters using LDAP backend. C
       ./03_dex-start.sh # make sure dex.yaml is correct
 
 - Deploy `dex-k8s-authenticator`
-  
+
       ./auth_dex_k8s_authenticator.sh
 
-- In browser, go to [http://dex-k8s-authenticator.127.0.0.1.nip.io/](http://dex-k8s-authenticator.127.0.0.1.nip.io/). Complete the authentication process (refer `ldap/config-ldap.ldif` for example users). It should show page like below on successful completion - 
+- In browser, go to [http://dex-k8s-authenticator.127.0.0.1.nip.io/](http://dex-k8s-authenticator.127.0.0.1.nip.io/). Complete the authentication process (refer `ldap/config-ldap.ldif` for example users). It should show page like below on successful completion -
 
 
   ![Alt text](dex-k8s-authenticator-img.png)
 
 
-> NOTE: `dex-k8s-authenticator` seems a better alternative than `kubelogin` at the moment, as it readily presents data to be copy-pasted as part of kube-config setup. It also supports multi-cluster configuration (to be evaluated). It reduces work for cluster admins in managing and monitoring whether configuration is correct or not for every user. 
+> NOTE: `dex-k8s-authenticator` seems a better alternative than `kubelogin` at the moment, as it readily presents data to be copy-pasted as part of kube-config setup. It also supports multi-cluster configuration (to be evaluated). It reduces work for cluster admins in managing and monitoring whether configuration is correct or not for every user.
 
 ## Cleanup
 
 - Destroy the setup
-  
+
       ./cleanup.sh
 
 ## Sources
@@ -44,6 +44,6 @@ Follow this guide to set up authentication to K8s clusters using LDAP backend. C
 - [Dex Github: LDAP setup for dex](https://github.com/dexidp/dex/tree/master/examples/ldap)
 - [Dex documentation: Authentication Through LDAP](https://dexidp.io/docs/connectors/ldap/#overview)
 
-## Next steps 
+## Next steps
 
-- Evaluate `dex-k8s-authenticator` for multi-cluster support 
+- Evaluate `dex-k8s-authenticator` for multi-cluster support

@@ -17,7 +17,7 @@ ln -sf ../oidc-with-dex/ssl ssl
 
 # Setup OIDC with DEX+DEX_k8s_authenticator
 ../oidc-with-dex/03_dex-start.sh
-../oidc-with-dex/04_auth_dex_k8s_authenticator.sh 
+../oidc-with-dex/04_auth_dex_k8s_authenticator.sh
 
 # create namespace sandbox
 
