@@ -1,0 +1,4 @@
+config:
+  lokiAddress: "http://loki-loki-distributed-gateway/loki/api/v1/push"
+  # file: {}
+  # lokiAddress: "http://loki.kube-prometheus-stack:3100"
