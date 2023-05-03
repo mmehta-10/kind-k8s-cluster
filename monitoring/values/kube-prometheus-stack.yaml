@@ -774,6 +774,8 @@ grafana:
   defaultDashboardsTimezone: utc
 
   adminPassword: prom-operator
+  nodeSelector: 
+    ingress-ready: "true"
 
   rbac:
     ## If true, Grafana PSPs will be created
@@ -887,7 +889,7 @@ grafana:
   ## Configure additional grafana datasources (passed through tpl)
   ## ref: http://docs.grafana.org/administration/provisioning/#datasources
   # additionalDataSources: []
-  additionalDataSources: 
+  additionalDataSources:
     - name: Loki
       type: loki
       url: http://loki-loki-distributed-query-frontend.kube-prometheus-stack:3100

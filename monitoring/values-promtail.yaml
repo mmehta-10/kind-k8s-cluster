@@ -1,9 +1,0 @@
-config:
-  clients:
-    - url: "http://loki-loki-distributed-gateway/loki/api/v1/push"
-  # file: {}
-  # lokiAddress: "http://loki.kube-prometheus-stack:3100"
-
-# config:
-#   clients:
-#     - url: http://<LOKI_DOMAIN>:3100/loki/api/v1/push
