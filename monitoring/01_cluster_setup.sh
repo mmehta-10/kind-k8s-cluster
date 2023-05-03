@@ -12,5 +12,5 @@ HOME_DIR=$PWD
 # Create symlink to ../oidc-with-dex/ssl dir, for next step
 # ln -sf ../oidc-with-dex/ssl ssl
 
-# Setup kind cluster with OIDC enabled
-../oidc-with-dex/kind.sh start
+# Setup kind cluster
+$BASEDIR/../simple/kind.sh start

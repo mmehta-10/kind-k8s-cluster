@@ -5,18 +5,12 @@ BASEDIR=$(dirname $0)
 echo $BASEDIR
 HOME_DIR=$PWD
 
-GRAFANA_RELEASE_NAME=grafana-test
-PROMETHEUS_RELEASE_NAME=prometheus
-LOKI_RELEASE_NAME=loki
+# Export vars for HELM repo and charts
+set -a
+source $BASEDIR/.env
+set +a
 
-# Delete Grafana
-helm delete $GRAFANA_RELEASE_NAME \
-    -n grafana || true
-
-# Delete Grafana
-helm delete $PROMETHEUS_RELEASE_NAME \
-    -n prometheus-namespace || true
-
-# Delete Loki
-helm delete $LOKI_RELEASE_NAME \
-    -n loki || true
+# Delete helm releases
+helm delete $LOKI_RELEASE_NAME -n $APP_NAMESPACE || true
+helm delete $PROMTAIL_RELEASE_NAME -n $APP_NAMESPACE || true
+helm delete $KUBE_PROM_RELEASE_NAME -n $APP_NAMESPACE || true
