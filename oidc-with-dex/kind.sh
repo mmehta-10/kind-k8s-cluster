@@ -6,7 +6,6 @@ echo $BASEDIR
 
 HOME_DIR=$PWD # HOME_DIR=$(dirname `dirname $PWD`)
 
-# KIND_CONFIG_FILE=kind-config.yaml
 KIND_CONFIG_FILE=kind-config.yaml
 
 case $1 in
@@ -22,7 +21,7 @@ apply)
 
 delete)
   # Destroy kind cluster
-  kind delete cluster
+  kind delete cluster kind-kind
   ;;
 
 *)

@@ -4,7 +4,6 @@ set -eux
 BASEDIR=$(dirname $0)
 echo $BASEDIR
 HOME_DIR=$PWD
-KUBE_PROM_RELEASE_NAME=prometheus
 
 # Export vars for HELM repo and charts
 set -a
