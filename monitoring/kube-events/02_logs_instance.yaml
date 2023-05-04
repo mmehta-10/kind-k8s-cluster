@@ -1,0 +1,33 @@
+apiVersion: monitoring.grafana.com/v1alpha1
+kind: LogsInstance
+metadata:
+  name: primary
+  namespace: kube-prometheus-stack
+  labels:
+    agent: grafana-agent-logs
+spec:
+  clients:
+  - url: http://loki-loki-distributed-gateway/loki/api/v1/push
+    # basicAuth:
+    #   username:
+    #     name: primary-credentials-logs
+    #     key: username
+    #   password:
+    #     name: primary-credentials-logs
+    #     key: password
+
+  # Supply an empty namespace selector to look in all namespaces. Remove
+  # this to only look in the same namespace as the LogsInstance CR
+  podLogsNamespaceSelector: {}
+  podLogsSelector:
+    matchLabels:
+      instance: primary
+---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: primary-credentials-logs
+#   namespace: kube-prometheus-stack
+# stringData:
+#   username: 'your_username_here'
+#   password: 'your_password_here'
