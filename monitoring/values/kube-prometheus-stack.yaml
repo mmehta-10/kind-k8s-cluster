@@ -774,7 +774,7 @@ grafana:
   defaultDashboardsTimezone: utc
 
   adminPassword: prom-operator
-  nodeSelector: 
+  nodeSelector:
     ingress-ready: "true"
 
   rbac:
