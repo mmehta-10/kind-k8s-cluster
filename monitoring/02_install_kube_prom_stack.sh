@@ -19,4 +19,4 @@ helm upgrade --install $KUBE_PROM_RELEASE_NAME \
     prometheus-community/kube-prometheus-stack \
     -n $APP_NAMESPACE \
     --create-namespace \
-    -f $BASEDIR/values-kube-prometheus-stack.yaml
+    -f $BASEDIR/values/kube-prometheus-stack.yaml
