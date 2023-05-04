@@ -8,7 +8,7 @@
 # spec:
 #   remoteWrite:
 #   # TODO: Customize below section
-#   - url: your_remote_write_URL 
+#   - url: your_remote_write_URL
 #     basicAuth:
 #       username:
 #         name: primary-credentials-metrics
