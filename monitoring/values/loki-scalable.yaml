@@ -1,15 +1,3 @@
-global:
-  image:
-    registry: null
-  priorityClassName: null
-  clusterDomain: "cluster.local"
-  dnsService: "kube-dns"
-  dnsNamespace: "kube-system"
-nameOverride: null
-fullnameOverride: null
-clusterLabelOverride: null
-imagePullSecrets: []
-
 loki:
   # Configures the readiness probe for all of the Loki pods
   readinessProbe:
@@ -226,14 +214,6 @@ loki:
   ingester: {}
   index_gateway:
     mode: ring 
-serviceAccount:
-  create: true
-  # If not set and create is true, a name is generated using the fullname template
-  name: null
-  imagePullSecrets: []
-  annotations: {}
-  labels: {}
-  automountServiceAccountToken: true
 
 # -- Section for configuring optional Helm test
 test:
@@ -300,22 +280,22 @@ monitoring:
   selfMonitoring:
     enabled: true
     tenant:
-        name: "self-monitoring"
-        # is in a separate namespace. Token will still be created in the canary namespace.
+      name: "self-monitoring"
+      # is in a separate namespace. Token will still be created in the canary namespace.
       secretNamespace: "{{ .Release.Namespace }}"
     # Grafana Agent configuration
     grafanaAgent:
         # Note that helm will not install CRDs if this flag is enabled during an upgrade.
       # In that case install the CRDs manually from https://github.com/grafana/agent/tree/main/production/operator/crds
       installOperator: true
-        annotations: {}
-        labels: {}
-        enableConfigReadAPI: false
+      annotations: {}
+      labels: {}
+      enableConfigReadAPI: false
     # PodLogs configuration
     podLogs:
-        annotations: {}
-        labels: {}
-        # https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
+      annotations: {}
+      labels: {}
+      # https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
       relabelings: []
     # LogsInstance configuration
     logsInstance:
