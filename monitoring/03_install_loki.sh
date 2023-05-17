@@ -14,9 +14,14 @@ set +a
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 
-# Install promtail and loki
-helm upgrade --install $PROMTAIL_RELEASE_NAME grafana/promtail -f $BASEDIR/monitoring/values/promtail.yaml -n $APP_NAMESPACE
-helm upgrade --install $LOKI_RELEASE_NAME grafana/loki-distributed -f $BASEDIR/monitoring/values/loki.yaml -n $APP_NAMESPACE
+# Install promtail and loki (scalable, not distributed)
+# Always start loki before launching promtail, otherwise promtail fails due to `connection refused` errors if started later
+
+# # loki-distributed 
+# helm upgrade --install $LOKI_RELEASE_NAME grafana/loki-distributed -f $BASEDIR/values/loki.yaml -n $APP_NAMESPACE
+# loki-scalable 
+helm upgrade --install $LOKI_RELEASE_NAME grafana/loki -f $BASEDIR/values/loki-scalable.yaml -n $APP_NAMESPACE
+helm upgrade --install $PROMTAIL_RELEASE_NAME grafana/promtail -f $BASEDIR/values/promtail.yaml -n $APP_NAMESPACE
 
 
 # helm upgrade --install loki grafana/loki-stack \
