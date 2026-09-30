@@ -5,7 +5,7 @@ configs:
 
   clusterCredentials:
     ckind:
-      server: https://127.0.0.1:54345
+      server: https://127.0.0.1:59724
       # labels: {}
       # annotations: {}
       config:
