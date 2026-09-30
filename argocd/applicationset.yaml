@@ -9,13 +9,13 @@ spec:
         elements:
           - name: 1password-secrets
             namespace: 1password
-            path: kind-cluster/1password
+            path: 1password
           - name: omniroute
             namespace: omniroute
-            path: kind-cluster/apps/omniroute
+            path: apps/omniroute
           - name: hermes
             namespace: hermes
-            path: kind-cluster/apps/hermes
+            path: apps/hermes
   template:
     metadata:
       name: '{{name}}'
@@ -24,8 +24,8 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/mmehta-10/helper-scripts.git
-        targetRevision: main
+        repoURL: https://github.com/mmehta-10/kind-k8s-cluster.git
+        targetRevision: megha/add-hermes
         path: '{{path}}'
       destination:
         server: https://kubernetes.default.svc

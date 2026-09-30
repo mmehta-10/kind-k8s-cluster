@@ -176,10 +176,7 @@ spec:
         - name: run
           mountPath: /run
         - name: source-code
-          mountPath: /workspace/kind-cluster
-          readOnly: false
-        - name: website-source
-          mountPath: /workspace/website
+          mountPath: /workspace
           readOnly: false
         # securityContext:
         #   runAsNonRoot: true
@@ -203,11 +200,7 @@ spec:
             path: configure-hermes.py
       - name: source-code
         hostPath:
-          path: /workspace/kind-cluster
-          type: Directory
-      - name: website-source
-        hostPath:
-          path: /workspace/website
+          path: /workspace
           type: Directory
 ---
 apiVersion: v1
