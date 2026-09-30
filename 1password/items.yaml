@@ -1,8 +1,8 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: omniroute
----
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: omniroute
+# ---
 apiVersion: onepassword.com/v1
 kind: OnePasswordItem
 metadata:
@@ -11,11 +11,11 @@ metadata:
 spec:
   itemPath: "vaults/local-setup/items/omniroute"
 ---
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: hermes
----
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: hermes
+# ---
 apiVersion: onepassword.com/v1
 kind: OnePasswordItem
 metadata:
@@ -32,11 +32,11 @@ metadata:
 spec:
   itemPath: "vaults/local-setup/items/hermes-dashboard-auth"
 ---
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: argocd
----
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: argocd
+# ---
 apiVersion: onepassword.com/v1
 kind: OnePasswordItem
 metadata:
