@@ -140,6 +140,8 @@ spec:
             secretKeyRef:
               name: hermes-integrations
               key: hermes-api-key
+        - name: HERMES_WRITE_SAFE_ROOT                                                                                                                                     
+          value: "/opt/data:/workspace"
 
         # dashboard
         - name: HERMES_DASHBOARD
