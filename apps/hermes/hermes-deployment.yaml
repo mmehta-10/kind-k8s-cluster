@@ -226,6 +226,7 @@ metadata:
   namespace: hermes
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
+    argocd.argoproj.io/ignore-healthcheck: "true"
 spec:
   ingressClassName: traefik
   rules:
