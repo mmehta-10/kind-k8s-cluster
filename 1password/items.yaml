@@ -32,11 +32,11 @@ metadata:
 spec:
   itemPath: "vaults/local-setup/items/hermes-dashboard-auth"
 ---
-# apiVersion: v1
-# kind: Namespace
-# metadata:
-#   name: argocd
-# ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
 apiVersion: onepassword.com/v1
 kind: OnePasswordItem
 metadata:
