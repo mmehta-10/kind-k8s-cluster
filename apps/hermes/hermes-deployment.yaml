@@ -1,0 +1,262 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hermes
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes-data
+  namespace: hermes
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-integration
+  namespace: hermes
+data:
+  configure-hermes.py: |
+    """Persist the Kubernetes-managed OmniRoute model settings on the Hermes PVC."""
+
+    import os
+    from pathlib import Path
+    import yaml
+
+    def update_config(config_path: Path, set_dashboard_theme: bool = False) -> None:
+        config = {}
+        if config_path.exists():
+            with config_path.open(encoding="utf-8") as stream:
+                config = yaml.safe_load(stream) or {}
+
+        model = config.setdefault("model", {})
+        model.update({
+            "provider": "custom",
+            "default": os.environ.get("OMNIROUTE_MODEL", "auto"),
+            "base_url": os.environ["OMNIROUTE_BASE_URL"],
+            "api_key": os.environ["OMNIROUTE_API_KEY"],
+        })
+        if set_dashboard_theme:
+            config.setdefault("dashboard", {})["theme"] = "midnight"
+
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary_path = config_path.with_suffix(".yaml.tmp")
+        with temporary_path.open("w", encoding="utf-8") as stream:
+            yaml.safe_dump(config, stream, sort_keys=False)
+        temporary_path.chmod(0o600)
+        temporary_path.replace(config_path)
+        try:
+            os.chown(config_path, 10000, 10000)
+        except PermissionError:
+            pass
+
+    update_config(Path("/opt/data/config.yaml"), set_dashboard_theme=True)
+    profiles_dir = Path("/opt/data/profiles")
+    if profiles_dir.is_dir():
+        for profile_config in sorted(profiles_dir.glob("*/config.yaml")):
+            update_config(profile_config)
+
+    env_path = Path("/opt/data/.env")
+    api_server_key = os.environ["HERMES_API_KEY"]
+    lines = env_path.read_text(encoding="utf-8").splitlines() if env_path.exists() else []
+    key_line = f"API_SERVER_KEY={api_server_key}"
+    replaced = False
+    for index, line in enumerate(lines):
+        if line.startswith("API_SERVER_KEY="):
+            lines[index] = key_line
+            replaced = True
+            break
+    if not replaced:
+        lines.append(key_line)
+    temporary_env_path = env_path.with_suffix(".env.tmp")
+    temporary_env_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    temporary_env_path.chmod(0o600)
+    temporary_env_path.replace(env_path)
+    try:
+        os.chown(env_path, 10000, 10000)
+    except PermissionError:
+        pass
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hermes-agent
+  namespace: hermes
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: hermes-agent
+  template:
+    metadata:
+      labels:
+        app: hermes-agent
+    spec:
+      initContainers:
+      - name: configure-hermes
+        image: nousresearch/hermes-agent:latest
+        imagePullPolicy: IfNotPresent
+        command: [python3, /opt/integration/configure-hermes.py]
+        env:
+        - name: OMNIROUTE_BASE_URL
+          value: "http://omniroute.omniroute.svc.cluster.local:20128/v1"
+        - name: OMNIROUTE_MODEL
+          value: "auto"
+        - name: OMNIROUTE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: hermes-integrations
+              key: omniroute-api-key
+        - name: HERMES_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: hermes-integrations
+              key: hermes-api-key
+        volumeMounts:
+        - name: data
+          mountPath: /opt/data
+        - name: integration
+          mountPath: /opt/integration
+          readOnly: true
+      containers:
+      - name: hermes
+        image: nousresearch/hermes-agent:latest
+        args: ["gateway", "run"]
+        env:
+        - name: API_SERVER_ENABLED
+          value: "true"
+        - name: API_SERVER_HOST
+          value: "0.0.0.0"
+        - name: API_SERVER_PORT
+          value: "8080"
+        - name: API_SERVER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: hermes-integrations
+              key: hermes-api-key
+
+        # dashboard
+        - name: HERMES_DASHBOARD
+          value: "1"
+        - name: HERMES_DASHBOARD_HOST
+          value: "0.0.0.0"
+        - name: HERMES_DASHBOARD_PORT
+          value: "9119"
+        - name: HERMES_DASHBOARD_PUBLIC_URL
+          value: "http://hermes.localhost"
+
+        # Dashboard authentication
+        - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: hermes-dashboard-auth
+              key: username
+        - name: HERMES_DASHBOARD_BASIC_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: hermes-dashboard-auth
+              key: password
+        - name: HERMES_DASHBOARD_BASIC_AUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: hermes-dashboard-auth
+              key: signing-secret
+        - name: S6_READ_ONLY_ROOT
+          value: "1"
+
+        volumeMounts:
+        - name: data
+          mountPath: /opt/data
+        - name: run
+          mountPath: /run
+        - name: source-code
+          mountPath: /workspace/kind-cluster
+          readOnly: false
+        - name: website-source
+          mountPath: /workspace/website
+          readOnly: false
+        # securityContext:
+        #   runAsNonRoot: true
+        #   runAsUser: 1000
+        ports:
+        - name: api
+          containerPort: 8080
+        - name: dashboard
+          containerPort: 9119
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: hermes-data
+      - name: run
+        emptyDir: {}
+      - name: integration
+        configMap:
+          name: hermes-integration
+          items:
+          - key: configure-hermes.py
+            path: configure-hermes.py
+      - name: source-code
+        hostPath:
+          path: /workspace/kind-cluster
+          type: Directory
+      - name: website-source
+        hostPath:
+          path: /workspace/website
+          type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hermes
+  namespace: hermes
+spec:
+  selector:
+    app: hermes-agent
+  ports:
+  - name: api
+    port: 8080
+    targetPort: api
+  - name: dashboard
+    port: 9119
+    targetPort: dashboard
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hermes
+  namespace: hermes
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: hermes.localhost
+    http:
+      paths:
+      - path: /v1
+        pathType: Prefix
+        backend:
+          service:
+            name: hermes
+            port:
+              name: api
+      - path: /health
+        pathType: Prefix
+        backend:
+          service:
+            name: hermes
+            port:
+              name: api
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: hermes
+            port:
+              name: dashboard

@@ -1,0 +1,28 @@
+# 1. Force the ArgoCD API Server to run in HTTP mode (disables built-in TLS)
+configs:
+  params:
+    server.insecure: "true"
+
+  clusterCredentials:
+    ckind:
+      server: https://127.0.0.1:54345
+      # labels: {}
+      # annotations: {}
+      config:
+        bearerToken: "<authentication token>"
+        tlsClientConfig:
+          insecure: false
+          caData: "<base64 encoded certificate>"
+
+# 2. Configure the Ingress resource without TLS blocks
+server:
+  ingress:
+    enabled: true
+    # Specify your ingress controller class (e.g., nginx, traefik, alb)
+    ingressClassName: traefik
+    hostname: argocd.localhost
+    path: /
+    pathType: Prefix
+    
+    # Strictly ensure TLS is set to false to prevent secret creation/attachment
+    tls: false

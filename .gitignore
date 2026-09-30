@@ -1,0 +1,11 @@
+*.env
+omniroute-secret.yaml
+argocd/argocd-secret.yaml
+
+# Terraform and Terragrunt local state/cache
+.terraform/
+.terragrunt-cache/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example

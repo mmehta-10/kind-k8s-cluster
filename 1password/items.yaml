@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: omniroute
+---
+apiVersion: onepassword.com/v1
+kind: OnePasswordItem
+metadata:
+  name: omniroute-auth
+  namespace: omniroute
+spec:
+  itemPath: "vaults/local-setup/items/omniroute"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hermes
+---
+apiVersion: onepassword.com/v1
+kind: OnePasswordItem
+metadata:
+  name: hermes-integrations
+  namespace: hermes
+spec:
+  itemPath: "vaults/local-setup/items/hermes"
+---
+apiVersion: onepassword.com/v1
+kind: OnePasswordItem
+metadata:
+  name: hermes-dashboard-auth
+  namespace: hermes
+spec:
+  itemPath: "vaults/local-setup/items/hermes-dashboard-auth"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+apiVersion: onepassword.com/v1
+kind: OnePasswordItem
+metadata:
+  name: github-app-repo-secret
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+spec:
+  itemPath: "vaults/local-setup/items/argocd-github-app"

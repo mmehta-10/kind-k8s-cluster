@@ -1,0 +1,239 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: omniroute
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: omniroute-data
+  namespace: omniroute
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-data
+  namespace: omniroute
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: omniroute
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:8.6.5-alpine
+          imagePullPolicy: IfNotPresent
+          args:
+            - redis-server
+            - --save
+            - "60"
+            - "1"
+            - --loglevel
+            - warning
+          ports:
+            - name: redis
+              containerPort: 6379
+          readinessProbe:
+            exec:
+              command: [redis-cli, ping]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command: [redis-cli, ping]
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: redis-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: omniroute
+spec:
+  type: ClusterIP
+  selector:
+    app: redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omniroute
+  namespace: omniroute
+spec:
+  # OmniRoute's default SQLite topology supports only one writer.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: omniroute
+  template:
+    metadata:
+      labels:
+        app: omniroute
+    spec:
+      terminationGracePeriodSeconds: 90
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: omniroute
+          image: diegosouzapw/omniroute:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 20128
+          env:
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: omniroute-auth
+                  key: jwt-secret
+            - name: API_KEY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: omniroute-auth
+                  key: api-key-secret
+            - name: OMNIROUTE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: omniroute-auth
+                  key: inference-api-key
+            - name: REQUIRE_API_KEY
+              value: "true"
+            - name: DATA_DIR
+              value: /app/data
+            - name: PORT
+              value: "20128"
+            - name: DASHBOARD_PORT
+              value: "20128"
+            - name: REDIS_URL
+              value: redis://redis:6379
+            - name: NEXT_PUBLIC_BASE_URL
+              value: http://omniroute.localhost
+            - name: BASE_URL
+              value: http://omniroute:20128
+            - name: AUTH_COOKIE_SECURE
+              value: "false"
+            - name: OMNIROUTE_MEMORY_MB
+              value: "1024"
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: [/bin/sleep, "15"]
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: omniroute-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: omniroute
+  namespace: omniroute
+spec:
+  type: ClusterIP
+  selector:
+    app: omniroute
+  ports:
+    - name: http
+      port: 20128
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: omniroute
+  namespace: omniroute
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: omniroute.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: omniroute
+                port:
+                  number: 20128

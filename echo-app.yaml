@@ -1,0 +1,244 @@
+## To learn ISTIO 
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: echo
+#   namespace: default
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: echo
+#       version: v1
+#   template:
+#     metadata:
+#       labels:
+#         app: echo
+#         version: v1
+#     spec:
+#       containers:
+#         - name: echo
+#           image: hashicorp/http-echo
+#           ports:
+#             - containerPort: 5678
+#           args:
+#             - "-text=Hello from v1"
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: echo-v2
+#   namespace: default
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: echo
+#       version: v2
+#   template:
+#     metadata:
+#       labels:
+#         app: echo
+#         version: v2
+#     spec:
+#       containers:
+#         - name: echo
+#           image: hashicorp/http-echo
+#           ports:
+#             - containerPort: 5678
+#           args:
+#             - "-text=Hello from v2"
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: echo
+#   namespace: default
+# spec:
+#   type: ClusterIP
+#   selector:
+#     app: echo
+#   ports:
+#     - port: 80
+#       targetPort: 5678
+# ---
+# apiVersion: networking.istio.io/v1
+# kind: VirtualService
+# metadata:
+#   name: split-traffic
+#   namespace: default
+# spec:
+#   hosts:
+#     - echo
+#   http:
+#     - route:
+#         - destination:
+#             host: echo
+#             subset: v1
+#           weight: 90
+#         - destination:
+#             host: echo
+#             subset: v2
+#           weight: 10
+# ---
+# apiVersion: networking.istio.io/v1beta1
+# kind: DestinationRule
+# metadata:
+#   name: split-traffic
+#   namespace: default
+# spec:
+#   host: echo
+#   subsets:
+#     - name: v1
+#       labels:
+#         # app: echo
+#         version: v1
+#     - name: v2
+#       labels:
+#         # app: echo
+#         version: v2
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-v1
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: echo
+        version: v1
+    spec:
+      containers:
+      - name: echo
+        image: hashicorp/http-echo
+        args: ["-text=Hello from v1"]
+        ports: [{containerPort: 5678}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-v2
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: echo
+        version: v2
+    spec:
+      containers:
+      - name: echo
+        image: hashicorp/http-echo
+        args: ["-text=Hello from v2"]
+        ports: [{containerPort: 5678}]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo
+  namespace: default
+spec:
+  selector:
+    app: echo
+  ports:
+  - port: 80
+    targetPort: 5678
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: echo
+  namespace: default
+spec:
+  host: echo
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: echo
+  namespace: default
+spec:
+  hosts:
+  - echo.local
+  gateways:
+  - echo-gateway
+  http:
+  # # header-based canary routing
+  # - match: 
+  #   - headers: 
+  #       x-canary:
+  #         exact: "true"
+  #   route: 
+  #   - destination:
+  #       host: echo
+  #       subset: v2
+
+  # header-based retries
+  - match: 
+    - headers: 
+        x-retries:
+          exact: "true"
+    route: 
+    - destination:
+        host: echo
+        subset: v2
+      weight: 100
+    timeout: 3s
+    retries:
+      attempts: 1
+      perTryTimeout: 2s
+      retryOn: "5xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes"
+    # inject fault deliberately to test retries
+    fault:
+      abort:
+        httpStatus: 503
+        percentage:
+          value: 90
+
+  # # path-based weighted routing
+  # - route:
+  #   - destination:
+  #       host: echo
+  #       subset: v1
+  #     weight: 90
+  #   - destination:
+  #       host: echo
+  #       subset: v2
+  #     weight: 10
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: echo-gateway
+  namespace: default
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "echo.local"

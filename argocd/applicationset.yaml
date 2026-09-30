@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: kind-cluster-apps
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: 1password-secrets
+            namespace: 1password
+            path: kind-cluster/1password
+          - name: omniroute
+            namespace: omniroute
+            path: kind-cluster/apps/omniroute
+          - name: hermes
+            namespace: hermes
+            path: kind-cluster/apps/hermes
+  template:
+    metadata:
+      name: '{{name}}'
+      labels:
+        app.kubernetes.io/managed-by: argocd
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/mmehta-10/helper-scripts.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true

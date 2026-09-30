@@ -1,0 +1,21 @@
+# traefik-values.yaml
+service:
+  spec:
+    type: NodePort
+
+ports:
+  traefik:
+    expose:
+      default: true
+    nodePort: 32090
+  web:
+    nodePort: 30080
+  websecure:
+    nodePort: 30443
+
+# (Optional) Restrict Traefik to the control-plane node if using a multi-node cluster
+nodeSelector:
+  kubernetes.io/hostname: kind-worker
+
+additionalArguments:
+  - "--api.insecure=true"
